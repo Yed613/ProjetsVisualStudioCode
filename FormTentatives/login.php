@@ -1,9 +1,28 @@
 <?php
 
 session_start();
-// verifie le nombre de tentatives précedentes ou pas 
+// verifie le nombre de tentatives précedentes ou pas
 $loginAttempts = isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] : 0;
-
+function bloque_tentatives() {
+    // Vérifiez si la variable de session existe
+    if (!isset($_SESSION['login_attempts'])) {
+        $_SESSION['login_attempts'] = 1;
+        $_SESSION['last_attempt_time'] = time();
+    } else {
+        // Vérifiez si la dernière tentative était il y a moins d'une minute
+        $temps_ecoule = time() - $_SESSION['last_attempt_time'];
+        if ($temps_ecoule < 60) {
+            // Bloquez l'authentification pour une minute
+            echo "deux tentatives ratés en moins d'une minute.";
+            exit();
+        } else {
+            // Réinitialisez le compteur et le temps de la dernière tentative
+            $_SESSION['login_attempts'] = 1;
+            $_SESSION['last_attempt_time'] = time();
+        }
+    }
+}
+bloque_tentatives();
 // Définir le nombre maximal de tentatives autorisées
 $maxLoginAttempts = 3;
 
